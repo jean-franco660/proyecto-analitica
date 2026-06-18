@@ -82,8 +82,8 @@ flowchart TD
     EP -->|Envía eventos JSON| Topic
     Topic -->|Lectura con auto.offset.reset=latest| C
     C -->|Registra en la ventana actual| W
-    W -->|Expiración de la ventana (minuto)| Console
-    W -->|Expiración de la ventana (minuto)| CSV
+    W -->|Expiración de la ventana| Console
+    W -->|Expiración de la ventana| CSV
 ```
 
 ---
