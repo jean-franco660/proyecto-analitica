@@ -1,0 +1,63 @@
+name: data-engineering-lab-2-streaming-broker
+
+services:
+  redpanda:
+    image: redpandadata/redpanda:v24.3.6
+    container_name: lab2-redpanda
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --mode
+      - dev-container
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --reserve-memory
+      - 0M
+      - --overprovisioned
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health -X brokers=redpanda:9092 | grep -E 'Healthy:.+true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - data-engineering-lab-2-streaming
+
+  create-topics:
+    image: redpandadata/redpanda:v24.3.6
+    container_name: lab2-redpanda-create-topics
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        rpk topic create user-activity \
+          -X brokers=redpanda:9092 \
+          --partitions 3 \
+          --replicas 1 || true
+        rpk topic list -X brokers=redpanda:9092
+    networks:
+      - data-engineering-lab-2-streaming
+
+volumes:
+  redpanda-data:
+
+networks:
+  data-engineering-lab-2-streaming:
+    name: data-engineering-lab-2-streaming

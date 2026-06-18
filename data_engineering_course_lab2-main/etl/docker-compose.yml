@@ -1,0 +1,102 @@
+name: data-engineering-lab-2-etl
+
+services:
+  spark-master:
+    image: apache/spark:3.5.5
+    container_name: lab2-spark-master
+    restart: unless-stopped
+    user: root
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.master.Master
+      - --host
+      - spark-master
+      - --port
+      - "7077"
+      - --webui-port
+      - "8080"
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      - data-engineering-lab-2-etl
+      - data-engineering-lab-2-db_default
+      - lab-2-minio_default
+
+  spark-worker-1:
+    image: apache/spark:3.5.5
+    container_name: lab2-spark-worker-1
+    restart: unless-stopped
+    user: root
+    depends_on:
+      - spark-master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - spark://spark-master:7077
+      - --cores
+      - "1"
+      - --memory
+      - 1G
+    networks:
+      - data-engineering-lab-2-etl
+      - data-engineering-lab-2-db_default
+      - lab-2-minio_default
+
+  etl-driver:
+    image: apache/spark:3.5.5
+    container_name: lab2-etl-driver
+    depends_on:
+      - spark-master
+      - spark-worker-1
+    user: root
+    working_dir: /app
+    volumes:
+      - ./run_etl.py:/app/run_etl.py:ro
+    command:
+      - /opt/spark/bin/spark-submit
+      - --master
+      - spark://spark-master:7077
+      - --driver-memory
+      - 512m
+      - --executor-memory
+      - 512m
+      - --conf
+      - spark.driver.host=etl-driver
+      - --conf
+      - spark.driver.bindAddress=0.0.0.0
+      - --packages
+      - com.mysql:mysql-connector-j:8.0.33,org.apache.hadoop:hadoop-aws:3.3.4
+      - /app/run_etl.py
+      - --mysql-host
+      - host.docker.internal
+      - --mysql-port
+      - "3307"
+      - --mysql-user
+      - admin
+      - --mysql-password
+      - adminpwrd
+      - --mysql-database
+      - classicmodels
+      - --target-path
+      - s3a://classicmodels-lab2/ratings_ml_training
+      - --s3-endpoint
+      - http://minio:9000
+      - --s3-access-key
+      - minioadmin
+      - --s3-secret-key
+      - minioadmin
+      - --jdbc-partitions
+      - "4"
+    networks:
+      - data-engineering-lab-2-etl
+      - data-engineering-lab-2-db_default
+      - lab-2-minio_default
+
+networks:
+  data-engineering-lab-2-etl:
+    name: data-engineering-lab-2-etl
+  data-engineering-lab-2-db_default:
+    external: true
+  lab-2-minio_default:
+    external: true

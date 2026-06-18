@@ -1,0 +1,55 @@
+name: data-engineering-lab-2-vector-db
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: lab2-vector-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: recommender
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespwrd
+    ports:
+      - "5433:5432"
+    volumes:
+      - vector-db-data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recommender"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - data-engineering-lab-2-vector-db
+
+  embeddings-loader:
+    build:
+      context: ./loader
+    container_name: lab2-vector-db-loader
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: recommender
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespwrd
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET: ml-artifacts
+      ITEM_EMBEDDINGS_KEY: embeddings/item_embeddings.csv
+      USER_EMBEDDINGS_KEY: embeddings/user_embeddings.csv
+    networks:
+      - data-engineering-lab-2-vector-db
+      - lab-2-minio_default
+
+volumes:
+  vector-db-data:
+
+networks:
+  data-engineering-lab-2-vector-db:
+    name: data-engineering-lab-2-vector-db
+  lab-2-minio_default:
+    external: true

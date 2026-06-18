@@ -1,0 +1,59 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Teacher-only local notes
+*.private.md
+docs/private/
+
+# Logs and runtime output
+*.log
+logs/
+tmp/
+temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Node, if students add UI experiments later
+node_modules/
+dist/
+build/
+.next/
+
+# Docker/local service data
+data/
+pgdata/
+mysql-data/
+minio-data/
+
+# Spark/Hadoop local artifacts
+.ivy2/
+.spark-warehouse/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Large generated data outputs
+*.parquet
+*.crc
+_SUCCESS

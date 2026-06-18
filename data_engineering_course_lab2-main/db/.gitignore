@@ -1,0 +1,7 @@
+# Local database runtime data
+data/
+mysql-data/
+
+# Temporary dumps; keep curated seed SQL files tracked
+*.tmp.sql
+*.bak.sql

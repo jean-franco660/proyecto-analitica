@@ -1,0 +1,38 @@
+name: data-engineering-lab-2-stream-processor
+
+services:
+  processor:
+    build:
+      context: .
+    container_name: lab2-stream-processor
+    restart: unless-stopped
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_TOPIC: user-activity
+      KAFKA_GROUP_ID: lab2-stream-processor
+      RECOMMENDATION_API_URL: http://lab2-recommendation-api:8000
+      ITEM_LIMIT: "5"
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: classicmodels
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpwrd
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET: recommendations
+    networks:
+      - data-engineering-lab-2-streaming
+      - data-engineering-lab-2-db_default
+      - data-engineering-lab-2-vector-db
+      - lab-2-minio_default
+
+networks:
+  data-engineering-lab-2-streaming:
+    external: true
+  data-engineering-lab-2-db_default:
+    external: true
+  data-engineering-lab-2-vector-db:
+    external: true
+  lab-2-minio_default:
+    external: true

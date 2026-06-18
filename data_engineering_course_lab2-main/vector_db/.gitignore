@@ -1,0 +1,14 @@
+# Database runtime data if mapped locally
+data/
+pgdata/
+postgres-data/
+
+# Python loader artifacts
+__pycache__/
+*.py[cod]
+
+# Local config and logs
+.env
+.env.*
+!.env.example
+*.log

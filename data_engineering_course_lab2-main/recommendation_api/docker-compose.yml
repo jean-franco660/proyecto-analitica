@@ -1,0 +1,23 @@
+name: data-engineering-lab-2-recommendation-api
+
+services:
+  api:
+    build:
+      context: .
+    container_name: lab2-recommendation-api
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: lab2-vector-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: recommender
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespwrd
+      API_PORT: "8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - data-engineering-lab-2-vector-db
+
+networks:
+  data-engineering-lab-2-vector-db:
+    external: true

@@ -1,0 +1,14 @@
+# Python and Spark local artifacts
+__pycache__/
+*.py[cod]
+.ivy2/
+.spark-warehouse/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Local ETL outputs
+output/
+*.parquet
+*.crc
+_SUCCESS

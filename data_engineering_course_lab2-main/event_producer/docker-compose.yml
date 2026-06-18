@@ -1,0 +1,29 @@
+name: data-engineering-lab-2-event-producer
+
+services:
+  api:
+    build:
+      context: .
+    container_name: lab2-event-producer
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: classicmodels
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpwrd
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_TOPIC: user-activity
+      DEFAULT_INTERVAL_SECONDS: "5"
+      MAX_BROWSE_HISTORY_ITEMS: "5"
+    ports:
+      - "8010:8000"
+    networks:
+      - data-engineering-lab-2-db_default
+      - data-engineering-lab-2-streaming
+
+networks:
+  data-engineering-lab-2-db_default:
+    external: true
+  data-engineering-lab-2-streaming:
+    external: true

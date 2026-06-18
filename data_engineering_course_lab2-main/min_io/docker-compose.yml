@@ -1,0 +1,45 @@
+name: lab-2-minio
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: lab2-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  create-buckets:
+    image: minio/mc:latest
+    container_name: lab2-minio-create-buckets
+    depends_on:
+      - minio
+    volumes:
+      - ../ml-artifacts:/seed/ml-artifacts:ro
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 minioadmin minioadmin;
+      mc mb --ignore-existing local/classicmodels-lab2;
+      mc mb --ignore-existing local/ml-artifacts;
+      mc mb --ignore-existing local/recommendations;
+      mc anonymous set none local/classicmodels-lab2;
+      mc anonymous set none local/ml-artifacts;
+      mc anonymous set none local/recommendations;
+      mc mirror --overwrite /seed/ml-artifacts local/ml-artifacts;
+      exit 0;
+      "
+
+volumes:
+  minio-data:

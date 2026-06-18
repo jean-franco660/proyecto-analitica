@@ -1,0 +1,31 @@
+name: data-engineering-lab-2-db
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: classicmodels-lab2-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpwrd
+      MYSQL_DATABASE: classicmodels
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpwrd
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --performance-schema=OFF
+      - --table-definition-cache=400
+      - --table-open-cache=256
+    ports:
+      - "3307:3306"
+    volumes:
+      - classicmodels-lab2-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpwrd"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  classicmodels-lab2-mysql-data:

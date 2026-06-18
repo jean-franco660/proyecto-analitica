@@ -1,0 +1,8 @@
+data/
+minio-data/
+
+# Local config and logs
+.env
+.env.*
+!.env.example
+*.log
